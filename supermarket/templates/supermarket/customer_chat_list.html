@@ -1,0 +1,42 @@
+{% extends 'supermarket/base.html' %}
+
+{% block content %}
+<div class="page-header">
+    <h2 class="page-title">Customer Chat Requests</h2>
+    <a href="{% url 'customer_chat' %}" class="btn btn-primary"><i class="fas fa-comments me-2"></i>New Customer
+        Message</a>
+</div>
+
+<div class="data-card">
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Product</th>
+                <th>Phone</th>
+                <th>Status</th>
+                <th>Received</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for chat in chats %}
+            <tr>
+                <td>{{ chat.customer_name }}<br><small>{{ chat.customer_email|default:'—' }}</small></td>
+                <td>{% if chat.product %}{{ chat.product.name }}{% else %}Any product{% endif %}</td>
+                <td>{{ chat.customer_phone|default:'—' }}</td>
+                <td>{{ chat.get_status_display }}</td>
+                <td>{{ chat.created_at|date:'M d, Y H:i' }}</td>
+                <td><a href="{% url 'customer_chat_detail' chat.pk %}" class="action-btn"><i class="fas fa-eye"></i></a>
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="6" style="text-align:center;color:var(--muted);padding:40px;">No customer messages yet.
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

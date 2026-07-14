@@ -2,7 +2,7 @@ from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib import messages
 from django.db.models import Sum, Count, Q
 from django.http import JsonResponse
-from django.views.decorators.http import require_GET
+from django.views.decorators.http import require_GET, require_POST
 from django.views.decorators.csrf import csrf_exempt
 from django.utils import timezone
 
@@ -10,9 +10,10 @@ import json
 import random
 import base64
 
-from .models import Product, Category, Supplier, Sale, Receipt, ReceiptItem, MpesaTransaction
-from .forms import ProductForm, CategoryForm, SupplierForm, SaleForm
-from .utils import generate_promptpay_qr
+from .models import Product, Category, Supplier, Sale, Receipt, ReceiptItem, MpesaTransaction, CustomerChat
+from .forms import ProductForm, CategoryForm, SupplierForm, SaleForm, CustomerChatForm
+from .utils import generate_promptpay_qr, send_whatsapp_via_twilio
+from django.conf import settings
 from django_daraja.mpesa.core import MpesaClient
 
 
@@ -46,7 +47,7 @@ def dashboard(request):
 # ─────────────────────────────────────────
 @require_GET
 def barcode_lookup(request):
-    code = request.GET.get('code', '').strip()
+    code = request.GET.get('code', request.GET.get('sku', '')).strip()
     if not code:
         return JsonResponse({'found': False, 'error': 'No barcode provided'})
 
@@ -66,6 +67,46 @@ def barcode_lookup(request):
         })
 
     return JsonResponse({'found': False, 'error': f'No product found for: {code}'})
+
+
+@require_POST
+def quick_sale(request):
+    try:
+        payload = json.loads(request.body.decode('utf-8'))
+        product_id = payload.get('product_id')
+        quantity = int(payload.get('quantity', 1))
+        cashier = payload.get('cashier', '').strip()
+
+        if not product_id or quantity < 1:
+            return JsonResponse({'success': False, 'error': 'Invalid sale data'})
+
+        product = Product.objects.get(pk=product_id, is_active=True)
+        if quantity > product.stock_quantity:
+            return JsonResponse({'success': False, 'error': 'Insufficient stock available'})
+
+        sale = Sale.objects.create(
+            product=product,
+            quantity_sold=quantity,
+            unit_price=product.price,
+            cashier=cashier,
+        )
+
+        return JsonResponse({
+            'success': True,
+            'product': product.name,
+            'total': str(sale.total_amount),
+            'remaining_stock': product.stock_quantity,
+        })
+    except Product.DoesNotExist:
+        return JsonResponse({'success': False, 'error': 'Product not found'})
+    except ValueError:
+        return JsonResponse({'success': False, 'error': 'Invalid sale payload'})
+    except Exception as exc:
+        return JsonResponse({'success': False, 'error': str(exc)})
+
+
+def barcode_scanner(request):
+    return render(request, 'supermarket/barcode_scanner.html')
 
 
 # ─────────────────────────────────────────
@@ -128,8 +169,8 @@ def pos_sale(request):
 # ─────────────────────────────────────────
 # RECEIPT
 # ─────────────────────────────────────────
-def receipt_detail(request, receipt_id):
-    receipt = get_object_or_404(Receipt, pk=receipt_id)
+def receipt_detail(request, pk):
+    receipt = get_object_or_404(Receipt, pk=pk)
     qr_buffer = generate_promptpay_qr(receipt.amount_paid)
     qr_base64 = base64.b64encode(qr_buffer.getvalue()).decode()
 
@@ -149,6 +190,66 @@ def receipt_list(request):
     receipts = Receipt.objects.all().order_by('-created_at')
     total = receipts.aggregate(total=Sum('grand_total'))['total'] or 0
     return render(request, 'supermarket/receipt_list.html', {'receipts': receipts, 'total': total})
+
+
+# ─────────────────────────────────────────
+# CUSTOMER CHAT
+# ─────────────────────────────────────────
+
+def customer_chat(request):
+    initial = {}
+    if request.GET.get('product'):
+        try:
+            initial['product'] = Product.objects.get(pk=int(request.GET.get('product')))
+        except (Product.DoesNotExist, ValueError):
+            pass
+
+    if request.method == 'POST':
+        form = CustomerChatForm(request.POST)
+        if form.is_valid():
+            chat = form.save()
+            # Send optional WhatsApp notifications
+            if getattr(settings, 'WHATSAPP_NOTIFICATIONS_ENABLED', False):
+                # Notify manager if configured
+                mgr_number = getattr(settings, 'MANAGER_WHATSAPP_NUMBER', '')
+                try:
+                    if mgr_number:
+                        mgr_msg = f"New customer message from {chat.customer_name}" \
+                                  f" about {chat.product.name if chat.product else 'a product'}: {chat.message}\nContact: {chat.customer_phone or chat.customer_email}"
+                        send_whatsapp_via_twilio(mgr_number, mgr_msg)
+                    # Optional acknowledgement to customer
+                    if getattr(settings, 'NOTIFY_CUSTOMER_ON_SUBMIT', False) and chat.customer_phone:
+                        cust_msg = f"Hi {chat.customer_name}, we've received your message about {chat.product.name if chat.product else 'your request'}. We'll contact you shortly."
+                        send_whatsapp_via_twilio(chat.customer_phone, cust_msg)
+                except Exception:
+                    # Don't block the user flow on notification errors
+                    pass
+
+            messages.success(request, 'Your message has been sent. Our manager will contact you soon.')
+            return redirect('customer_chat')
+    else:
+        form = CustomerChatForm(initial=initial)
+
+    return render(request, 'supermarket/customer_chat.html', {'form': form})
+
+
+def customer_chat_list(request):
+    chats = CustomerChat.objects.all()
+    return render(request, 'supermarket/customer_chat_list.html', {'chats': chats})
+
+
+def customer_chat_detail(request, pk):
+    chat = get_object_or_404(CustomerChat, pk=pk)
+    if request.method == 'POST':
+        response_text = request.POST.get('manager_response', '').strip()
+        if response_text:
+            chat.manager_response = response_text
+            chat.status = CustomerChat.STATUS_RESPONDED
+            chat.responded_at = timezone.now()
+            chat.save()
+            messages.success(request, 'Response saved.')
+            return redirect('customer_chat_detail', pk=chat.pk)
+    return render(request, 'supermarket/customer_chat_detail.html', {'chat': chat})
 
 
 # ─────────────────────────────────────────

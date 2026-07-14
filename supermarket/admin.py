@@ -1,5 +1,6 @@
 from django.contrib import admin
-from .models import Product, Category, Supplier, Sale
+from django.utils.html import format_html
+from .models import Product, Category, Supplier, Sale, CustomerChat
 
 
 @admin.register(Category)
@@ -16,9 +17,24 @@ class SupplierAdmin(admin.ModelAdmin):
 
 @admin.register(Product)
 class ProductAdmin(admin.ModelAdmin):
-    list_display = ['name', 'sku', 'category', 'price', 'stock_quantity', 'is_active']
+    list_display = ['name', 'sku', 'barcode_number', 'barcode_preview', 'category', 'price', 'stock_quantity', 'is_active']
     list_filter = ['category', 'is_active']
-    search_fields = ['name', 'sku']
+    search_fields = ['name', 'sku', 'barcode_number']
+    readonly_fields = ['barcode_preview']
+
+    def barcode_preview(self, obj):
+        if obj.barcode_image:
+            return format_html('<img src="{}" style="height:40px;width:auto;" />', obj.barcode_image.url)
+        return '-'
+    barcode_preview.short_description = 'Barcode'
+
+
+@admin.register(CustomerChat)
+class CustomerChatAdmin(admin.ModelAdmin):
+    list_display = ['customer_name', 'customer_phone', 'customer_email', 'product', 'status', 'created_at']
+    list_filter = ['status', 'created_at']
+    search_fields = ['customer_name', 'customer_phone', 'customer_email', 'subject', 'message']
+    readonly_fields = ['created_at', 'responded_at']
 
 
 @admin.register(Sale)

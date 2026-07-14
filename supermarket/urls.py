@@ -14,7 +14,13 @@ urlpatterns = [
 
     # Barcode
     path('barcode/lookup/', views.barcode_lookup, name='barcode_lookup'),
+    path('api/barcode-lookup/', views.barcode_lookup, name='api_barcode_lookup'),
+    path('api/quick-sale/', views.quick_sale, name='api_quick_sale'),
+    path('scan/', views.barcode_scanner, name='barcode_scanner'),
     path('pos/', views.pos_sale, name='pos_sale'),
+    path('chat/', views.customer_chat, name='customer_chat'),
+    path('customer-chats/', views.customer_chat_list, name='customer_chat_list'),
+    path('customer-chats/<int:pk>/', views.customer_chat_detail, name='customer_chat_detail'),
     path('products/<int:pk>/barcode/', views.product_barcode, name='product_barcode'),
 
     # Receipts

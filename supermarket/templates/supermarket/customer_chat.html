@@ -1,0 +1,48 @@
+{% extends 'supermarket/base.html' %}
+
+{% block content %}
+<div class="page-header">
+    <h2 class="page-title">Chat with Manager</h2>
+    <a href="javascript:history.back()" class="btn btn-outline-secondary"><i class="fas fa-arrow-left me-2"></i>Back</a>
+</div>
+
+<div class="data-card">
+    <div class="data-card-header">Send a message from home</div>
+    <div class="p-4">
+        <p style="color:var(--muted);">Use this form to ask about product availability, place an order, or request
+            delivery. Our manager will respond as soon as possible.</p>
+        <form method="post" novalidate>
+            {% csrf_token %}
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <label>Name</label>
+                    {{ form.customer_name }}
+                </div>
+                <div class="col-md-6">
+                    <label>Phone / WhatsApp</label>
+                    {{ form.customer_phone }}
+                </div>
+                <div class="col-md-6">
+                    <label>Email</label>
+                    {{ form.customer_email }}
+                </div>
+                <div class="col-md-6">
+                    <label>Product (optional)</label>
+                    {{ form.product }}
+                </div>
+                <div class="col-12">
+                    <label>Subject</label>
+                    {{ form.subject }}
+                </div>
+                <div class="col-12">
+                    <label>Message</label>
+                    {{ form.message }}
+                </div>
+            </div>
+            <div class="mt-4">
+                <button type="submit" class="btn btn-primary px-4">Send message</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

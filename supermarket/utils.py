@@ -1,6 +1,9 @@
 # supermarket/utils.py
 import qrcode
 from io import BytesIO
+import requests
+import re
+from django.conf import settings
 
 def generate_promptpay_qr(amount, payee="0123456789"):
     """
@@ -28,3 +31,46 @@ def generate_promptpay_qr(amount, payee="0123456789"):
     img.save(buffer, format="PNG")
     buffer.seek(0)
     return buffer
+
+
+def send_whatsapp_via_twilio(to_number: str, body: str) -> bool:
+    """
+    Send a WhatsApp message via Twilio REST API.
+
+    Returns True on success, False otherwise.
+    Requires these settings to be configured in Django settings:
+      - WHATSAPP_NOTIFICATIONS_ENABLED (bool)
+      - TWILIO_ACCOUNT_SID
+      - TWILIO_AUTH_TOKEN
+      - TWILIO_WHATSAPP_FROM (e.g. 'whatsapp:+1415...')
+    """
+    if not getattr(settings, 'WHATSAPP_NOTIFICATIONS_ENABLED', False):
+        return False
+
+    account_sid = getattr(settings, 'TWILIO_ACCOUNT_SID', '')
+    auth_token = getattr(settings, 'TWILIO_AUTH_TOKEN', '')
+    from_whatsapp = getattr(settings, 'TWILIO_WHATSAPP_FROM', '')
+    if not (account_sid and auth_token and from_whatsapp):
+        return False
+
+    # Normalize recipient number: ensure it starts with '+' and digits only
+    digits = re.sub(r"\D", "", to_number or "")
+    if not digits:
+        return False
+    if not to_number.strip().startswith('+'):
+        to_whatsapp = f"+{digits}"
+    else:
+        to_whatsapp = to_number
+
+    url = f"https://api.twilio.com/2010-04-01/Accounts/{account_sid}/Messages.json"
+    data = {
+        'To': f'whatsapp:{to_whatsapp}',
+        'From': from_whatsapp if from_whatsapp.startswith('whatsapp:') else f'whatsapp:{from_whatsapp}',
+        'Body': body,
+    }
+
+    try:
+        resp = requests.post(url, data=data, auth=(account_sid, auth_token), timeout=10)
+        return resp.status_code in (200, 201)
+    except Exception:
+        return False

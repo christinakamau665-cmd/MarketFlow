@@ -88,3 +88,14 @@ MPESA_SHORTCODE_TYPE = 'paybill'  # or ''
 MPESA_PASSKEY = 'bfb279f9aa9bdbcf158e97dd71a467cd2e0c893059b10f78e6b72ada1ed2c919'
 
 MPESA_CALLBACK_URL = 'https://your-ngrok-url.ngrok.io/mpesa/callback/ '
+
+# Optional WhatsApp (Twilio) notification settings
+# To enable, set WHATSAPP_NOTIFICATIONS_ENABLED = True and provide Twilio credentials.
+WHATSAPP_NOTIFICATIONS_ENABLED = False
+TWILIO_ACCOUNT_SID = ''
+TWILIO_AUTH_TOKEN = ''
+TWILIO_WHATSAPP_FROM = ''  # e.g. 'whatsapp:+1415XXXXXXX'
+# Manager number to receive new-chat alerts (use international format, e.g. +2547...)
+MANAGER_WHATSAPP_NUMBER = ''
+# If True, also send an acknowledgement message to the customer (requires customer's phone)
+NOTIFY_CUSTOMER_ON_SUBMIT = False

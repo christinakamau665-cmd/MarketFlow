@@ -4,7 +4,8 @@
 <div class="page-header">
     <h2 class="page-title">Products</h2>
     <div class="d-flex gap-2">
-        <a href="{% url 'pos_sale' %}" class="btn btn-outline-secondary"><i class="fas fa-barcode me-2"></i>POS Scanner</a>
+        <a href="{% url 'pos_sale' %}" class="btn btn-outline-secondary"><i class="fas fa-barcode me-2"></i>POS
+            Scanner</a>
         <a href="{% url 'product_add' %}" class="btn btn-primary"><i class="fas fa-plus me-2"></i>Add Product</a>
     </div>
 </div>
@@ -13,11 +14,13 @@
 <div class="data-card mb-4">
     <div class="p-3">
         <form method="get" class="d-flex gap-2">
-            <input type="text" name="q" class="form-control" placeholder="Search by name, SKU or barcode..." value="{{ query }}">
+            <input type="text" name="q" class="form-control" placeholder="Search by name, SKU or barcode..."
+                value="{{ query }}">
             <select name="category" class="form-select" style="max-width:200px;">
                 <option value="">All Categories</option>
                 {% for cat in categories %}
-                    <option value="{{ cat.id }}" {% if selected_category == cat.id|stringformat:"s" %}selected{% endif %}>{{ cat.name }}</option>
+               <option value="{{ cat.id }}" {% if selected_category == cat.id|stringformat:"s" %}selected{% endif %}>{{
+                    cat.name }}</option>
                 {% endfor %}
             </select>
             <button type="submit" class="btn btn-primary px-4">Search</button>
@@ -44,15 +47,17 @@
             <tr>
                 <td>
                     <div style="font-weight:500;">{{ product.name }}</div>
-                    {% if product.supplier %}<div style="color:var(--muted);font-size:0.8rem;">{{ product.supplier.name }}</div>{% endif %}
+                    {% if product.supplier %}<div style="color:var(--muted);font-size:0.8rem;">{{ product.supplier.name
+                        }}</div>{% endif %}
                 </td>
                 <td>
                     {% if product.barcode_image %}
-                        <a href="{% url 'product_barcode' product.pk %}" title="View & Print Barcode">
-                            <img src="{{ product.barcode_image.url }}" alt="barcode" style="height:32px;width:auto;background:#fff;padding:2px;border-radius:4px;">
-                        </a>
+                    <a href="{% url 'product_barcode' product.pk %}" title="View & Print Barcode">
+                        <img src="{{ product.barcode_image.url }}" alt="barcode"
+                            style="height:32px;width:auto;background:#fff;padding:2px;border-radius:4px;">
+                    </a>
                     {% else %}
-                        <span style="color:var(--muted);font-size:0.8rem;">—</span>
+                    <span style="color:var(--muted);font-size:0.8rem;">—</span>
                     {% endif %}
                 </td>
                 <td style="font-family:monospace;color:var(--muted);font-size:0.85rem;">{{ product.sku }}</td>
@@ -60,19 +65,26 @@
                 <td>KES {{ product.price }}</td>
                 <td>
                     {% if product.is_low_stock %}
-                        <span class="badge-low">{{ product.stock_quantity }} ⚠️</span>
+                    <span class="badge-low">{{ product.stock_quantity }} ⚠️</span>
                     {% else %}
-                        <span class="badge-ok">{{ product.stock_quantity }}</span>
+                    <span class="badge-ok">{{ product.stock_quantity }}</span>
                     {% endif %}
                 </td>
                 <td>
-                    <a href="{% url 'product_barcode' product.pk %}" class="action-btn" title="Print Barcode"><i class="fas fa-barcode"></i></a>
-                    <a href="{% url 'product_edit' product.pk %}" class="action-btn ms-1" title="Edit"><i class="fas fa-pen"></i></a>
-                    <a href="{% url 'product_delete' product.pk %}" class="action-btn danger ms-1" title="Delete"><i class="fas fa-trash"></i></a>
+                    <a href="{% url 'customer_chat' %}?product={{ product.pk }}" class="action-btn"
+                        title="Chat about this product"><i class="fas fa-comments"></i></a>
+                    <a href="{% url 'product_barcode' product.pk %}" class="action-btn ms-1" title="Print Barcode"><i
+                            class="fas fa-barcode"></i></a>
+                    <a href="{% url 'product_edit' product.pk %}" class="action-btn ms-1" title="Edit"><i
+                            class="fas fa-pen"></i></a>
+                    <a href="{% url 'product_delete' product.pk %}" class="action-btn danger ms-1" title="Delete"><i
+                            class="fas fa-trash"></i></a>
                 </td>
             </tr>
             {% empty %}
-            <tr><td colspan="7" style="color:var(--muted);text-align:center;padding:40px;">No products found.</td></tr>
+            <tr>
+                <td colspan="7" style="color:var(--muted);text-align:center;padding:40px;">No products found.</td>
+            </tr>
             {% endfor %}
         </tbody>
     </table>

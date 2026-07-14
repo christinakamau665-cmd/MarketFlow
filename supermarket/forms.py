@@ -1,5 +1,5 @@
 from django import forms
-from .models import Product, Category, Supplier, Sale
+from .models import Product, Category, Supplier, Sale, CustomerChat
 
 
 class ProductForm(forms.ModelForm):
@@ -23,23 +23,25 @@ class ProductForm(forms.ModelForm):
 class CategoryForm(forms.ModelForm):
     class Meta:
         model = Category
-        fields = ['name', 'description']
+        fields = ['name', 'description', 'is_active']
         widgets = {
-            'name': forms.TextInput(attrs={'class': 'form-control'}),
-            'description': forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
+            'name': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'e.g. Fresh Produce'}),
+            'description': forms.Textarea(attrs={'class': 'form-control', 'rows': 3, 'placeholder': 'Short note about this category'}),
+            'is_active': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
         }
 
 
 class SupplierForm(forms.ModelForm):
     class Meta:
         model = Supplier
-        fields = ['name', 'contact_person', 'phone', 'email', 'address']
+        fields = ['name', 'contact_person', 'phone', 'email', 'address', 'is_active']
         widgets = {
-            'name': forms.TextInput(attrs={'class': 'form-control'}),
-            'contact_person': forms.TextInput(attrs={'class': 'form-control'}),
-            'phone': forms.TextInput(attrs={'class': 'form-control'}),
-            'email': forms.EmailInput(attrs={'class': 'form-control'}),
-            'address': forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
+            'name': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Supplier name'}),
+            'contact_person': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Primary contact'}),
+            'phone': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'e.g. 0712345678'}),
+            'email': forms.EmailInput(attrs={'class': 'form-control', 'placeholder': 'name@example.com'}),
+            'address': forms.Textarea(attrs={'class': 'form-control', 'rows': 3, 'placeholder': 'Physical address or delivery notes'}),
+            'is_active': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
         }
 
 
@@ -53,4 +55,18 @@ class SaleForm(forms.ModelForm):
             'unit_price': forms.NumberInput(attrs={'class': 'form-control', 'step': '0.01'}),
             'cashier': forms.TextInput(attrs={'class': 'form-control'}),
             'notes': forms.Textarea(attrs={'class': 'form-control', 'rows': 2}),
+        }
+
+
+class CustomerChatForm(forms.ModelForm):
+    class Meta:
+        model = CustomerChat
+        fields = ['customer_name', 'customer_email', 'customer_phone', 'product', 'subject', 'message']
+        widgets = {
+            'customer_name': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Your name'}),
+            'customer_email': forms.EmailInput(attrs={'class': 'form-control', 'placeholder': 'Your email (optional)'}),
+            'customer_phone': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Phone or WhatsApp number'}),
+            'product': forms.Select(attrs={'class': 'form-control'}),
+            'subject': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'What are you interested in? (optional)'}),
+            'message': forms.Textarea(attrs={'class': 'form-control', 'rows': 4, 'placeholder': 'Describe your order or question...'}),
         }
