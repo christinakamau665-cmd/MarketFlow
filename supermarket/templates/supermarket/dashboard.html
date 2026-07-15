@@ -1161,15 +1161,23 @@ function closePayPopup() {
 document.getElementById('pay-popup-overlay').addEventListener('click', function(e) {
   if (e.target === this) closePayPopup();
 });
-</script>
+
 
 <!-- POS logic -->
-<script>
+
 const ALL_PRODUCTS = [
     {% for p in all_products %}
-    { id: {{ p.pk }}, name: "{{ p.name|escapejs }}", sku: "{{ p.sku|escapejs }}", barcode: "{{ p.barcode_number|escapejs }}", price: {{ p.price }}, stock: {{ p.stock_quantity }} },
+    { 
+        id: {{ p.pk }}, 
+        name: "{{ p.name|escapejs }}", 
+        sku: "{{ p.sku|escapejs }}", 
+        barcode: "{{ p.barcode_number|escapejs }}", 
+        price: {{ p.price }}, 
+        stock: {{ p.stock_quantity }} 
+    }{% if not forloop.last %},{% endif %}
     {% endfor %}
 ];
+
 
 let cart = [];
 
