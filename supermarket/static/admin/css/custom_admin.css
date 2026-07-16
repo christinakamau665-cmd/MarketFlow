@@ -1,0 +1,125 @@
+/* ── Bright theme override for Django admin ── */
+
+:root {
+    --primary: #2979FF;
+    --secondary: #0052CC;
+    --accent: #FFAB00;
+    --primary-fg: #fff;
+
+    --body-fg: #101828;
+    --body-bg: #F4F7FF;
+    --body-quiet-color: #667085;
+    --body-loud-color: #101828;
+
+    --header-color: #ffffff;
+    --header-branding-color: #FFE0EC;
+    --header-bg: #C0125A;
+    --header-link-color: #ffffff;
+
+    --breadcrumbs-fg: #D0E2FF;
+    --breadcrumbs-link-fg: #ffffff;
+    --breadcrumbs-bg: #2979FF;
+
+    --link-fg: #2979FF;
+    --link-hover-color: #C0125A;
+    --link-selected-fg: #C0125A;
+
+    --hairline-color: #D0E2FF;
+    --border-color: #D0E2FF;
+
+    --error-fg: #FF3B30;
+
+    --message-success-bg: #C8F7D9;
+    --message-warning-bg: #FFE7B3;
+    --message-error-bg: #FFD9D6;
+
+    --darkened-bg: #EEF3FF;
+    --selected-bg: #D0E2FF;
+    --selected-row: #FFE7B3;
+
+    --button-fg: #fff;
+    --button-bg: #FF2D78;
+    --button-hover-bg: #C0125A;
+    --default-button-bg: #2979FF;
+    --default-button-hover-bg: #0052CC;
+    --close-button-bg: #667085;
+    --close-button-hover-bg: #101828;
+    --delete-button-bg: #FF3B30;
+    --delete-button-hover-bg: #D32F2F;
+
+    --object-tools-fg: #fff;
+    --object-tools-bg: #00C853;
+    --object-tools-hover-bg: #00873E;
+
+    --font-family-primary: 'Poppins', -apple-system, sans-serif;
+    --font-family-monospace: 'Space Mono', monospace;
+}
+
+body, input, textarea, select, .button, button {
+    font-family: var(--font-family-primary) !important;
+}
+
+#header {
+    background: linear-gradient(135deg, #C0125A 0%, #2979FF 100%);
+    box-shadow: 0 2px 10px rgba(192,18,90,0.25);
+}
+
+#branding h1, #branding h1 a:link, #branding h1 a:visited {
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    color: #ffffff;
+}
+
+div.breadcrumbs {
+    background: var(--breadcrumbs-bg);
+    font-weight: 500;
+}
+
+.module h2, .module caption, .inline-group h2 {
+    background: linear-gradient(135deg, #2979FF 0%, #0052CC 100%);
+    color: #fff;
+    font-weight: 600;
+}
+
+.button, input[type=submit], input[type=button], .submit-row input, a.button {
+    border-radius: 8px;
+    font-weight: 600;
+    box-shadow: 0 2px 8px rgba(255,45,120,0.25);
+}
+
+.button.default, input[type=submit].default, .submit-row input.default {
+    box-shadow: 0 2px 8px rgba(41,121,255,0.3);
+}
+
+#changelist-filter {
+    border-radius: 10px;
+    border: 1px solid var(--border-color);
+}
+
+#changelist-filter h2 {
+    background: #FF2D78;
+    border-radius: 10px 10px 0 0;
+}
+
+.results {
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+table thead th {
+    background: var(--darkened-bg) !important;
+}
+
+.dashboard .module table th, .dashboard .module table td {
+    font-family: var(--font-family-primary);
+}
+
+a:link, a:visited {
+    color: var(--link-fg);
+}
+
+.object-tools a.addlink {
+    background: var(--object-tools-bg);
+    border-radius: 100px;
+    font-weight: 600;
+}
